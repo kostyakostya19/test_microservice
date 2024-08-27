@@ -21,7 +21,7 @@ jobs:
           if [ -f bashBasic.sh ]; then
             echo "passed"
           else
-            echo bash not found"
+            echo "bash not found"
             exit 1
           fi
 
