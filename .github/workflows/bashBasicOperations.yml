@@ -27,7 +27,7 @@ jobs:
 
       - name: pack the artfiact
         run: |
-          tar -czf test_package.tar.gz ./bashBasicOperations.yml
+          tar -czf test_package.tar.gz ./bashBasic.sh
 
       - name: upload artifact to githubspace
         uses: actions/upload-artifact@v3
