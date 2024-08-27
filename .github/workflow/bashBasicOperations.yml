@@ -1,0 +1,60 @@
+name: bashBasicOperations
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on:
+      - ubuntu-latest
+
+      steps:
+        - name: checkout code
+          uses: actions/checkout@v3
+
+        - name: check bash
+          run: |
+            pwd
+            ls -l -a
+            if [ -f bashBasic.sh ]; then
+              echo "passed"
+            else
+              echo bash not found"
+              exit 1
+            fi
+
+        - name: pack the artfiact
+          run: |
+            tar -czf test_package.tar.gz ./bashBasicOperations.yml
+
+        - name: upload artifact to githubspace
+          uses: actions/upload-artifact@v3
+          with:
+            name: bashArtifact
+            path: test_package.tar.gz
+  test:
+    needs: build
+    runs-on:
+      - ubuntu-latest
+
+      steps:
+        - name: get artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: test_package.tar.gz
+
+        - name: extract pack
+          run: tar -xzf test_package.tar.gz
+
+        - name: test script
+          run: |
+            chmod +x bashBasic.sh
+            ./bashBasic.sh
+
+#  deploy:
+#    runs-on:
+      
+
+          
