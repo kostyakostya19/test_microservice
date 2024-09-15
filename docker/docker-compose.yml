@@ -1,0 +1,67 @@
+---
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: 'rabbimq_test_microservice'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=quest
+      - RABBITMQ_DEFAULT_PASS=quest
+
+  postgres:
+    image: postgres:14
+    container_name: 'postgres_test_microservice'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    depends_on:
+      - rabbitmq
+
+  traefik:
+    image: traefik:3.1.2
+    container_name: 'traefik_test_microservice'
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+  
+  text_operations_service:
+    build:
+      context: ../text_operations_service
+      dockerfile: Dockerfile
+    image: text_operations_service:latest
+    container_name: text_operations_service
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      - rabbitmq
+      - postgres
+      - traefik
+
+  api_service:
+    build:
+      context: ../api_service
+      dockerfile: Dockerfile
+    image: api_service:latest
+    container_name: tapi_service_service
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    depends_on:
+      - text_operations_service

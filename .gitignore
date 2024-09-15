@@ -1,0 +1,7 @@
+__pycache__
+.venv
+venv
+config.py
+get_system_stats_service/
+.env
+postgres_data
